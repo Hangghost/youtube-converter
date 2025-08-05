@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "youtube-transfer"
+version = "0.1.0"
+description = "YouTube to MP3 converter CLI tool"
+authors = ["Your Name"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+yt-dlp = "^2025.7.21"
+pydub = "^0.25.1"
+click = "^8.2.1"
+
+[tool.poetry.scripts]
+youtube-transfer = "youtube_transfer.cli:main"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
