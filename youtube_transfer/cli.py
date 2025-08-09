@@ -138,7 +138,7 @@ class YouTubeConverter:
             click.echo(f"❌ 影片下載失敗: {e}", err=True)
             return False
     
-    def download_audio(self, url: str, quality: str = "192") -> bool:
+    def download_audio(self, url: str, quality: str = "192", volume: Optional[str] = None) -> bool:
         """下載影片並轉換為 MP3."""
         if not self.validate_youtube_url(url):
             click.echo("❌ 無效的 YouTube URL", err=True)
@@ -163,6 +163,31 @@ class YouTubeConverter:
             }],
             'progress_hooks': [self._progress_hook],
         }
+
+        # 若指定音量，加入 FFmpeg 濾鏡
+        if volume is not None:
+            v = volume.strip()
+            expr = None
+            try:
+                if v.lower().endswith('db'):
+                    val = float(v[:-2])
+                    expr = f"volume={val}dB"
+                elif v.endswith('%'):
+                    pct = float(v[:-1])
+                    expr = f"volume={pct/100.0}"
+                elif v.lower().endswith('x'):
+                    factor = float(v[:-1])
+                    expr = f"volume={factor}"
+                else:
+                    factor = float(v)
+                    expr = f"volume={factor}"
+            except ValueError:
+                click.echo("❌ 無效的音量格式。請使用例如: 1.5、150%、+6dB、-3dB、0.8x", err=True)
+                return False
+
+            if expr:
+                # 將濾鏡套用到後處理階段
+                ydl_opts['postprocessor_args'] = ['-filter:a', expr]
         
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -199,7 +224,7 @@ class YouTubeConverter:
 
 
 @click.group()
-@click.version_option(version='0.2.0')
+@click.version_option(version='0.3.0')
 def cli():
     """
     YouTube 下載器 - 支援影片 (MP4) 和音訊 (MP3) 下載
@@ -242,7 +267,8 @@ def video(url: str, output_dir: str, quality: str):
               help='輸出目錄 (預設: downloads)')
 @click.option('--quality', '-q', default='192', 
               help='MP3 音質 (預設: 192)')
-def audio(url: str, output_dir: str, quality: str):
+@click.option('--volume', default=None, help='調整音量，例如: 1.5、150%、+6dB、-3dB、0.8x')
+def audio(url: str, output_dir: str, quality: str, volume: Optional[str]):
     """下載 YouTube 影片並轉換為 MP3 格式."""
     click.echo("🎵 YouTube 轉 MP3 下載器")
     click.echo("=" * 40)
@@ -257,7 +283,7 @@ def audio(url: str, output_dir: str, quality: str):
     converter = YouTubeConverter(output_dir)
     
     # 開始下載
-    success = converter.download_audio(url, quality)
+    success = converter.download_audio(url, quality, volume)
     
     if success:
         click.echo(f"📁 MP3 檔案已儲存至: {output_dir}")

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "youtube-transfer"
-version = "0.2.0"
+version = "0.3.0"
 description = "YouTube to MP3/MP4 converter CLI tool"
 authors = ["Your Name"]
 readme = "README.md"

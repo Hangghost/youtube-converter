@@ -85,6 +85,14 @@ poetry run python -m youtube_transfer.cli audio "URL" -q 320
 
 # 指定輸出目錄
 poetry run python -m youtube_transfer.cli audio "URL" -o my_music
+
+# 調整音量（三種表達方式）
+# 倍數：
+poetry run python -m youtube_transfer.cli audio "URL" --volume 1.5
+# 百分比（zsh/bash 需加引號避免展開）：
+poetry run python -m youtube_transfer.cli audio "URL" --volume '150%'
+# 分貝：
+poetry run python -m youtube_transfer.cli audio "URL" --volume +6dB
 ```
 
 ### ℹ️ 查詢影片資訊
